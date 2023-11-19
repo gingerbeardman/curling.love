@@ -36,7 +36,15 @@ local PLAYER = 1
 local CPU = 2
 scoreTeam = ""
 scorePoints = 0
-winner = "START\n"
+
+msg = {""}
+function addMsg(m)
+	-- if #msg > 2 then
+		table.remove(msg)
+	-- end
+	table.insert(msg, m)
+end
+addMsg("START")
 
 local cpuPlayer = {
 	targetX = 0,
@@ -74,23 +82,108 @@ function love.conf(t)
 	t.window.display = 1	-- Index of the monitor to show the window in (number)
 end
 
-function love.load()
+function createRock(x, y, t)
+	local rock = {
+		x = x,
+		y = y,
+		vx = 0,
+		vy = 0,
+		dvx = 0,
+		rot = 0,
+		team = t,
+		inplay = true
+	}
+	table.insert(rocks, rock)
+	
+	totalRocksThrown = totalRocksThrown + 1
+
+	if totalRocksThrown == MAX_ROCKS + 1 then
+		addMsg("WINNER ".. scoreTeam .." ".. scorePoints)
+		love.load()
+	elseif #rocks > 2 then
+		addMsg("")
+	end
+
+	calcScores()
+end
+
+function createRockCPU()
+	createRock(WINDOW_WIDTH/2 + math.random(-WINDOW_WIDTH/4, WINDOW_WIDTH/4), math.random(PPM * 2 * 1.829, PPM * 4 * 1.829), CPU)
+end
+
+-- Function to calculate the distance between two points
+local function calculateDistance(x1, y1, x2, y2)
+	local dx = x2 - x1
+	local dy = y2 - y1
+	return math.sqrt(dx^2 + dy^2)
+end
+
+-- Function to sort rocks by distance from a point
+function sortRocksByDistance(rocks, pointX, pointY)
+	table.sort(rocks, function(a, b)
+		local distanceA = calculateDistance(a.x, a.y, pointX, pointY)
+		local distanceB = calculateDistance(b.x, b.y, pointX, pointY)
+		return distanceA < distanceB
+	end)
+end
+
+function calcScores()
+	tx = WINDOW_WIDTH/2
+	ty = (PPM * 3 * 1.829)
+	
+	sorted = {unpack (rocks)}
+	
+	sortRocksByDistance(sorted, tx, ty)
+	
+	-- Draw the rocks
+--	print("distances")
+	local closestRocks = 0
+	local closestTeam = nil
+	local closestChange = false
+	for n, rock in ipairs(sorted) do
+		if rock.inplay == true and rock.y < PPM * (3 * 1.829 + 6.401) then
+--			print((closestTeam == CPU and "CPU" or "PLAYER"), calculateDistance(rock.x, rock.y, tx,ty))
+
+			if closestTeam == nil then
+				closestTeam = rock.team
+				closestRocks = closestRocks + 1
+			elseif closestChange == false and rock.team == closestTeam then
+				closestRocks = closestRocks + 1
+			elseif rock.team ~= closestTeam then
+				closestChange = true
+			end
+		end
+	end
+	scoreTeam = (closestTeam == CPU and "CPU" or "PLAYER")
+	scorePoints = closestRocks
+--	print("scores")
+--	print(scoreTeam, scorePoints)
+end
+
+function reset()
 	rocks = {}
 	totalRocksThrown = 0
 	rocksInMotion = 0
-	
-	love.math.setRandomSeed(love.math.random(12))
 
-	-- Set up the window
-	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
-	love.window.setTitle("Portrait Curling")
-	love.graphics.setBackgroundColor( 1,1,1 )
+	math.randomseed(os.clock()*100000000000)
+
+	-- love.math.setRandomSeed(love.math.random(12))
 	
 	-- Set up the initial rocks
 	for e = 1,1 do
 		createRockCPU()
 	end
 	createRock(WINDOW_WIDTH / 2, POS_START , PLAYER)
+end
+reset()
+
+function love.load()
+	-- Set up the window
+	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
+	love.window.setTitle("Portrait Curling")
+	love.graphics.setBackgroundColor( 1,1,1 )
+
+	reset()
 	
 	-- Set up CPU player
 	cpuPlayer.targetX = WINDOW_WIDTH / 2
@@ -155,6 +248,8 @@ function love.update(dt)
 		rock.x = rock.x + rock.vx * dt
 		rock.y = rock.y + rock.vy * dt
 		
+		rock.rot = (rock.rot + rock.dvx*1000/2) % 360
+		
 		-- Check collision with other rocks
 		for j, otherRock in ipairs(rocks) do
 			if j ~= i and rock.inplay and otherRock.inplay then
@@ -199,7 +294,6 @@ function love.update(dt)
 			rock.vx = 0
 			rock.vy = 0
 			rock.dvx = 0
-			-- winner = ""
 			if speed > STOP then
 				rock.inplay = false
 			end
@@ -311,7 +405,7 @@ function love.draw()
 		end
 	
 		if n == #rocks and sweeping == true then
-			love.graphics.setColor( 0.2,0.8,1 )
+			love.graphics.setColor( 0.2,0.8,1, 0.5 )
 			love.graphics.circle("line", rock.x, rock.y, ROCK_RADIUS*2)
 		end
 	
@@ -342,10 +436,17 @@ function love.draw()
 			else
 				showvals = "%2d"
 			end
-			love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx* 1000), rock.x-7,rock.y+7)
+			love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx*1000, rock.rot), rock.x-7,rock.y+7)
 			if WINDOW_HEIGHT > deskh then
-				love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx* 1000), WINDOW_WIDTH/2,10)
+				love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx*1000, rock.rot), WINDOW_WIDTH/2,10)
 			end
+			
+			love.graphics.setColor( 0,0,0, 0.2 )
+			local rangle = math.rad(rock.rot-90)
+			local rangleopp = math.rad(rock.rot+90)
+			-- love.graphics.setLineWidth( 1)
+			-- love.graphics.line(rock.x + 3*math.cos(rangle), rock.y + 3*math.sin(rangle), rock.x + 2*math.cos(rangleopp), rock.y + 2*math.sin(rangleopp))
+			love.graphics.circle("fill", rock.x + 3*math.cos(rangle), rock.y + 3*math.sin(rangle),1.5)
 		end
 	end
 
@@ -354,84 +455,12 @@ function love.draw()
 	else
 		love.graphics.setColor( 0.8,0,0 )
 	end
-	love.graphics.print(string.format("%s%s %d", winner, scoreTeam, scorePoints), 2,2)
+	love.graphics.print(string.format("%s %d", scoreTeam, scorePoints), 2,2)
+	
+	for _, m in ipairs(msg) do
+		love.graphics.setColor( 0,0,0 )
+		love.graphics.print(string.format("%s", m), WINDOW_WIDTH-100,2)
+	end
 
 --	love.graphics.print(string.format("moving: %d", rocksInMotion), 2,2)
-end
-
-function createRock(x, y, t)
-	local rock = {
-		x = x,
-		y = y,
-		vx = 0,
-		vy = 0,
-		dvx = 0,
-		team = t,
-		inplay = true
-	}
-	table.insert(rocks, rock)
-	
-	totalRocksThrown = totalRocksThrown + 1
-
-	if totalRocksThrown == MAX_ROCKS + 1 then
-		winner = "WINNER ".. scoreTeam .." ".. scorePoints .. "\n"
-		love.load()
-	elseif #rocks > 2 then
-		winner = ""
-	end
-
-	calcScores()
-end
-
-function createRockCPU()
-	createRock(WINDOW_WIDTH/2 + love.math.random(-WINDOW_WIDTH/4, WINDOW_WIDTH/4), love.math.random(PPM * 2 * 1.829, PPM * 4 * 1.829), CPU)
-end
-
--- Function to calculate the distance between two points
-local function calculateDistance(x1, y1, x2, y2)
-	local dx = x2 - x1
-	local dy = y2 - y1
-	return math.sqrt(dx^2 + dy^2)
-end
-
--- Function to sort rocks by distance from a point
-function sortRocksByDistance(rocks, pointX, pointY)
-	table.sort(rocks, function(a, b)
-		local distanceA = calculateDistance(a.x, a.y, pointX, pointY)
-		local distanceB = calculateDistance(b.x, b.y, pointX, pointY)
-		return distanceA < distanceB
-	end)
-end
-
-function calcScores()
-	tx = WINDOW_WIDTH/2
-	ty = (PPM * 3 * 1.829)
-	
-	sorted = {unpack (rocks)}
-	
-	sortRocksByDistance(sorted, tx, ty)
-	
-	-- Draw the rocks
---	print("distances")
-	local closestRocks = 0
-	local closestTeam = nil
-	local closestChange = false
-	for n, rock in ipairs(sorted) do
-		if rock.inplay == true and rock.y < PPM * (3 * 1.829 + 6.401) then
---			print((closestTeam == CPU and "CPU" or "PLAYER"), calculateDistance(rock.x, rock.y, tx,ty))
-
-			if closestTeam == nil then
-				closestTeam = rock.team
-				closestRocks = closestRocks + 1
-			elseif closestChange == false and rock.team == closestTeam then
-				closestRocks = closestRocks + 1
-			elseif rock.team ~= closestTeam then
-				closestChange = true
-			end
-		end
-	end
-	scoreTeam = (closestTeam == CPU and "CPU" or "PLAYER")
-	scorePoints = closestRocks
---	print("scores")
---	print(scoreTeam, scorePoints)
 end
