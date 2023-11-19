@@ -1,5 +1,9 @@
-w,h = love.window.getDesktopDimensions( 1 )
+deskw,deskh = love.window.getDesktopDimensions( 1 )
+w = deskw
+h = deskh
 print("main monitor size",w.."x"..h)
+
+-- h = 1920
 
 -- scale constants with difference to "100% size"
 
@@ -314,7 +318,7 @@ function love.draw()
 				showvals = "%2d"
 			end
 			love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx* 1000), rock.x-7,rock.y+7)
-			if WINDOW_HEIGHT > h then
+			if WINDOW_HEIGHT > deskh then
 				love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx* 1000), WINDOW_WIDTH/2,10)
 			end
 		end
