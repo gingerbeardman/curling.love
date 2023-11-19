@@ -351,8 +351,8 @@ function createRock(x, y, t)
 	if totalRocksThrown == MAX_ROCKS + 1 then
 		winner = "WINNER ".. scoreTeam .." ".. scorePoints .. "\n"
 		love.load()
-	else
-		-- winner = ""
+	elseif #rocks > 2 then
+		winner = ""
 	end
 
 	calcScores()
