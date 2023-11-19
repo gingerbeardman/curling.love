@@ -1,6 +1,3 @@
---here is my code:
---```
-
 w,h = love.window.getDesktopDimensions( 1 )
 print("main monitor size",w.."x"..h)
 
@@ -28,7 +25,7 @@ local POWER_STEP = (408/(PPM * (2*1.829 + 6.401 + 0.07 + 0.1)))/3	-- inside edge
 -- Variables
 rocks = {}
 local totalRocksThrown = 0
-local MAX_ROCKS = 3
+local MAX_ROCKS = 16
 
 local ticks = 0
 local canBoost = false
