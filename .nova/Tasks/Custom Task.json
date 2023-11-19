@@ -1,0 +1,13 @@
+{
+  "actions" : {
+    "build" : {
+      "enabled" : true,
+      "script" : "zip -9 -r ..\/curling.love main.lua\nopen ..\/"
+    },
+    "run" : {
+      "enabled" : true,
+      "script" : "#!\/bin\/sh\n\/Applications\/love.app\/Contents\/MacOS\/love ."
+    }
+  },
+  "openLogOnRun" : "start"
+}
