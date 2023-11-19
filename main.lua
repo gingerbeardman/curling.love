@@ -1,4 +1,4 @@
-deskw,deskh = love.window.getDesktopDimensions( 1 )
+deskw,deskh = love.window.getDesktopDimensions( 2 )
 w = deskw
 h = deskh
 print("main monitor size",w.."x"..h)
