@@ -1,30 +1,25 @@
-deskw,deskh = love.window.getDesktopDimensions( 1 )
-w = deskw
-h = deskh
-print("main monitor size",w.."x"..h)
-
--- h = 1920
+h = 1920
 
 -- scale constants with difference to "100% size"
 
 -- Constants
-local WINDOW_HEIGHT = h-70
-local PPM = WINDOW_HEIGHT/45	--metres
-local WINDOW_WIDTH = PPM * 4.572
-local POS_START = WINDOW_HEIGHT - (PPM * (1.829 + 0.07 + 0.1 + 0.1))
-local GRAVITY = 9.81 -- m/s^2
+local WINDOW_HEIGHT = 0
+local PPM = 0
+local WINDOW_WIDTH = 0
+local POS_START = 0
+local GRAVITY = 0
 
 -- Rock properties
-local MULT = 2
-local SCALE = 5
-local ROCK_RADIUS = PPM * 0.145	 --m, max
-local ROCK_MASS = 18.71 / (SCALE * MULT)	--kgm 17.46 to 19.96
-local FRICTION_COEFFICIENT = 0.16	-- ice friction
-local COEFFICIENT_OF_RESTITUTION = 0.83 -- Elasticity of the collision
-local STOP = 0.05	-- min speed
-local MAX = PPM * 2.6	-- m/s
-local ROCK_SPEED = MAX -- Initial speed of the rock
-local POWER_STEP = (408/(PPM * (2*1.829 + 6.401 + 0.07 + 0.1)))/3	-- inside edge and hack length?
+local MULT = 0
+local SCALE = 0
+local ROCK_RADIUS = 0
+local ROCK_MASS = 0
+local FRICTION_COEFFICIENT = 0
+local COEFFICIENT_OF_RESTITUTION = 0
+local STOP = 0
+local MAX = 0
+local ROCK_SPEED = 0
+local POWER_STEP = 0
 
 -- Variables
 rocks = {}
@@ -48,6 +43,36 @@ local cpuPlayer = {
 	targetY = 0,
 	active = false
 }
+
+function init()
+	deskw,deskh = love.window.getDesktopDimensions()
+	w = deskw
+	h = deskh
+	-- print("main monitor size",w.."x"..h)
+
+	WINDOW_HEIGHT = h-70
+	PPM = WINDOW_HEIGHT/45	--metres
+	WINDOW_WIDTH = PPM * 4.572
+	POS_START = WINDOW_HEIGHT - (PPM * (1.829 + 0.07 + 0.1 + 0.1))
+	GRAVITY = 9.81 -- m/s^2
+	
+	-- Rock properties
+	MULT = 2
+	SCALE = 5
+	ROCK_RADIUS = PPM * 0.145	 --m, max
+	ROCK_MASS = 18.71 / (SCALE * MULT)	--kgm 17.46 to 19.96
+	FRICTION_COEFFICIENT = 0.16	-- ice friction
+	COEFFICIENT_OF_RESTITUTION = 0.83 -- Elasticity of the collision
+	STOP = 0.05	-- min speed
+	MAX = PPM * 2.6	-- m/s
+	ROCK_SPEED = MAX -- Initial speed of the rock
+	POWER_STEP = (408/(PPM * (2*1.829 + 6.401 + 0.07 + 0.1)))/3	-- inside edge and hack length?
+end
+init()
+
+function love.conf(t)
+	t.window.display = 1	-- Index of the monitor to show the window in (number)
+end
 
 function love.load()
 	rocks = {}
