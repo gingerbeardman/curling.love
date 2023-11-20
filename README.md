@@ -1,5 +1,5 @@
 # curling.love
-Curling to scale
+Curling sim, to scale, in a tall window
 
 ## itch.io
 
