@@ -24,7 +24,7 @@ local POWER_STEP = 0
 -- Variables
 rocks = {}
 local totalRocksThrown = 0
-local MAX_ROCKS = 4--16
+local MAX_ROCKS = 16
 
 local ticks = 0
 local canBoost = false
