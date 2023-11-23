@@ -24,7 +24,7 @@ local POWER_STEP = 0
 -- Variables
 rocks = {}
 local totalRocksThrown = 0
-local MAX_ROCKS = 16
+local MAX_ROCKS = 4--16
 
 local ticks = 0
 local canBoost = false
@@ -37,14 +37,7 @@ local CPU = 2
 scoreTeam = ""
 scorePoints = 0
 
-msg = {""}
-function addMsg(m)
-	-- if #msg > 2 then
-		table.remove(msg)
-	-- end
-	table.insert(msg, m)
-end
-addMsg("START")
+msg = "START"
 
 local cpuPlayer = {
 	targetX = 0,
@@ -94,14 +87,14 @@ function createRock(x, y, t)
 		inplay = true
 	}
 	table.insert(rocks, rock)
-	
+
 	totalRocksThrown = totalRocksThrown + 1
 
 	if totalRocksThrown == MAX_ROCKS + 1 then
-		addMsg("WINNER ".. scoreTeam .." ".. scorePoints)
+		msg = "WINNER ".. scoreTeam .." ".. scorePoints
 		love.load()
 	elseif #rocks > 2 then
-		addMsg("")
+		msg = ""
 	end
 
 	calcScores()
@@ -142,7 +135,7 @@ function calcScores()
 	local closestChange = false
 	for n, rock in ipairs(sorted) do
 		if rock.inplay == true and rock.y < PPM * (3 * 1.829 + 6.401) then
---			print((closestTeam == CPU and "CPU" or "PLAYER"), calculateDistance(rock.x, rock.y, tx,ty))
+--			print((closestTeam == CPU and "CPU" or "YOU"), calculateDistance(rock.x, rock.y, tx,ty))
 
 			if closestTeam == nil then
 				closestTeam = rock.team
@@ -154,10 +147,10 @@ function calcScores()
 			end
 		end
 	end
-	scoreTeam = (closestTeam == CPU and "CPU" or "PLAYER")
+	scoreTeam = (closestTeam == CPU and "CPU" or "YOU")
 	scorePoints = closestRocks
---	print("scores")
---	print(scoreTeam, scorePoints)
+	print("scores")
+	print(scoreTeam, scorePoints)
 end
 
 function reset()
@@ -358,7 +351,7 @@ function love.draw()
 		end
 
 		-- hack lines
-		love.graphics.setColor( 0,0,0 )
+		love.graphics.setColor( 0,0,0,0.5 )
 		love.graphics.setLineWidth( PPM * 0.1 )
 		local y = (1.829+0.07/2) * PPM
 		love.graphics.line(WINDOW_WIDTH/2-(PPM*0.45/2),offy+offm*y,WINDOW_WIDTH/2-(PPM*0.07),offy+offm*y)
@@ -366,22 +359,22 @@ function love.draw()
 		love.graphics.setLineWidth( 0 )
 		
 		-- back lines
-		love.graphics.setColor( 0,0,0, 0.25 )
+		love.graphics.setColor( 0,0,0, 0.125 )
 		local y = 2 * 1.829 * PPM
 		love.graphics.line(0,offy+offm*y,WINDOW_WIDTH,offy+offm*y)
 	
 		-- tee
-		love.graphics.setColor( 0.8,0,0 )
+		love.graphics.setColor( 0.8,0,0, 0.5 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 1.829)
 		love.graphics.setColor( 1,1,1 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 1.219)
-		love.graphics.setColor( 0,0,0.8 )
+		love.graphics.setColor( 0,0,0.8, 0.5 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 0.610)
 		love.graphics.setColor( 1,1,1 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 0.152)
 
 		-- tee lines
-		love.graphics.setColor( 0,0,0, 0.25 )
+		love.graphics.setColor( 0,0,0, 0.125 )
 		local y = 3 * 1.829 * PPM
 		love.graphics.line(0,offy+offm*y,WINDOW_WIDTH,offy+offm*y)
 	
@@ -392,7 +385,7 @@ function love.draw()
 	
 		-- hog lines
 		love.graphics.setLineWidth( PPM * 0.1)
-		love.graphics.setColor( 0.7,0,0 )
+		love.graphics.setColor( 0.7,0,0, 0.5 )
 		local y = (3 * 1.829 + 6.401) * PPM
 		love.graphics.line(0,offy+offm*y,WINDOW_WIDTH,offy+offm*y)
 	end
@@ -441,12 +434,12 @@ function love.draw()
 				love.graphics.print(string.format(showvals, speed, rock.vx, rock.dvx*1000, rock.rot), WINDOW_WIDTH/2,10)
 			end
 			
-			love.graphics.setColor( 0,0,0, 0.2 )
+			love.graphics.setColor( 0,0,0, 0.35 )
 			local rangle = math.rad(rock.rot-90)
 			local rangleopp = math.rad(rock.rot+90)
 			-- love.graphics.setLineWidth( 1)
 			-- love.graphics.line(rock.x + 3*math.cos(rangle), rock.y + 3*math.sin(rangle), rock.x + 2*math.cos(rangleopp), rock.y + 2*math.sin(rangleopp))
-			love.graphics.circle("fill", rock.x + 3*math.cos(rangle), rock.y + 3*math.sin(rangle),1.5)
+			love.graphics.circle("fill", rock.x + 2.5*math.cos(rangle), rock.y + 2.5*math.sin(rangle),2)
 		end
 	end
 
@@ -457,10 +450,8 @@ function love.draw()
 	end
 	love.graphics.print(string.format("%s %d", scoreTeam, scorePoints), 2,2)
 	
-	for _, m in ipairs(msg) do
-		love.graphics.setColor( 0,0,0 )
-		love.graphics.print(string.format("%s", m), WINDOW_WIDTH-100,2)
-	end
+	love.graphics.setColor( 0,0,0 )
+	love.graphics.print(string.format("%s", msg), WINDOW_WIDTH-100,2)
 
 --	love.graphics.print(string.format("moving: %d", rocksInMotion), 2,2)
 end
