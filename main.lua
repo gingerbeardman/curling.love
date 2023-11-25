@@ -71,10 +71,6 @@ function init()
 end
 init()
 
-function love.conf(t)
-	t.window.display = 1	-- Index of the monitor to show the window in (number)
-end
-
 function createRock(x, y, t)
 	local rock = {
 		x = x,
@@ -172,7 +168,7 @@ reset()
 
 function love.load()
 	-- Set up the window
-	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
+	love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {msaa = 4})
 	love.window.setTitle("Portrait Curling")
 	love.graphics.setBackgroundColor( 1,1,1 )
 
@@ -364,11 +360,11 @@ function love.draw()
 		love.graphics.line(0,offy+offm*y,WINDOW_WIDTH,offy+offm*y)
 	
 		-- tee
-		love.graphics.setColor( 0.8,0,0, 0.5 )
+		love.graphics.setColor( 0,0,0.8, 0.5 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 1.829)
 		love.graphics.setColor( 1,1,1 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 1.219)
-		love.graphics.setColor( 0,0,0.8, 0.5 )
+		love.graphics.setColor( 0.8,0,0, 0.5 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 0.610)
 		love.graphics.setColor( 1,1,1 )
 		love.graphics.circle("fill", WINDOW_WIDTH/2, offy+offm* (PPM * 3 * 1.829), PPM * 0.152)
